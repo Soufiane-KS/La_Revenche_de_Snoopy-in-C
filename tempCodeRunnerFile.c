@@ -47,67 +47,9 @@ typedef struct
 } Collectible;
 
 char terrain[HAUTEUR][LARGEUR];
-Collectible collectibles[NUM_COLLECTIBLES]; //Birds
 
-void ClearTerrain();
-void MoveBall(Balle *balle);
-void Setup(Balle *balle, Snoopy *snoopy);
-void Draw(Balle *balle, Snoopy *snoopy);
-void MoveSnoopy(Snoopy *snoopy);
-void ShowPauseMenu();
-void ShowGameOver(Snoopy *snoopy);
-void ShowYouWon(Snoopy *snoopy);
-void Logic(Balle *ball, Snoopy *snoopy);
-void MainMenu();
-
-
-
-
-
-
-
-//-----------------main----------------//
-
-int main()
-{
-    Balle balle;
-    Snoopy snoopy;
-
-    MainMenu();
-    Setup(&balle, &snoopy);
-
-    while (balle.vivant && !GameOver)
-    {
-        // Move the ball and draw
-        MoveSnoopy(&snoopy);
-        MoveBall(&balle);
-        Draw(&balle, &snoopy);
-        Logic(&balle, &snoopy);
-        Sleep(100); // Sleep for 100 milliseconds
-    }
-
-    if (!GameOver)
-    {
-        ShowYouWon(&snoopy);
-        exit(0);
-    }
-    else
-    {
-        ShowGameOver(&snoopy);
-    }
-
-    return 0;
-}
-
-//--------------------------main-end----------------------------//
-
-
-
-
-
-
-
-
+// Array to store collectibles
+Collectible collectibles[NUM_COLLECTIBLES];
 
 void ClearTerrain()
 {
@@ -399,4 +341,35 @@ void MainMenu()
     printf("           Press any key to start...         \n");
 
     _getch(); // Wait for any key press
+}
+
+int main()
+{
+    Balle balle;
+    Snoopy snoopy;
+
+    MainMenu();
+    Setup(&balle, &snoopy);
+
+    while (balle.vivant && !GameOver)
+    {
+        // Move the ball and draw
+        MoveSnoopy(&snoopy);
+        MoveBall(&balle);
+        Draw(&balle, &snoopy);
+        Logic(&balle, &snoopy);
+        Sleep(100); // Sleep for 100 milliseconds
+    }
+
+    if (!GameOver)
+    {
+        ShowYouWon(&snoopy);
+        exit(0);
+    }
+    else
+    {
+        ShowGameOver(&snoopy);
+    }
+
+    return 0;
 }
