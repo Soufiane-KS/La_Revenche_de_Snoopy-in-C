@@ -1,4 +1,4 @@
-#include <stdio.h>
+Q#include <stdio.h>
 #include <stdlib.h>
 #include <windows.h> // for Sleep function
 #include <conio.h>
@@ -54,6 +54,13 @@ void ClearTerrain()
             }
         }
     }
+
+    // Add three blocks in the middle horizontally
+    int middleRow = HAUTEUR / 2;
+    int middleColumn = LARGEUR / 2;
+    terrain[middleRow][middleColumn - 1] = '#';
+    terrain[middleRow][middleColumn] = '#';
+    terrain[middleRow][middleColumn + 1] = '#';
 }
 
 void MoveBall(Balle *balle)
@@ -95,8 +102,8 @@ void Setup(Balle *balle, Snoopy *snoopy)
     balle->dirX = 1; // initial x-direction
     balle->dirY = 1; // initial y-direction
     // initialise snoopy
-    snoopy->pos.y = HAUTEUR / 2;
-    snoopy->pos.x = LARGEUR / 2;
+    snoopy->pos.y = HAUTEUR / 2 + 1;
+    snoopy->pos.x = LARGEUR / 2 + 1;
     snoopy->score = 0;
     snoopy->vie = 3;
     snoopy->v = 'S';
@@ -126,8 +133,12 @@ void Draw(Balle *balle, Snoopy *snoopy)
 
 void MoveSnoopy(Snoopy *snoopy)
 {
-    if (_kbhit())
+     if (_kbhit())
     {
+        // Store the current position in case the next move is invalid
+        int prevX = snoopy->pos.x;
+        int prevY = snoopy->pos.y;
+
         // Move Snoopy based on input
         switch (_getch())
         {
@@ -143,6 +154,14 @@ void MoveSnoopy(Snoopy *snoopy)
         case 'Q': // Left
             snoopy->pos.x--;
             break;
+        }
+
+        // Check if the next position is valid (not on a wall)
+        if (terrain[snoopy->pos.y][snoopy->pos.x] == '#')
+        {
+            // If the next position is a wall, restore the previous position
+            snoopy->pos.x = prevX;
+            snoopy->pos.y = prevY;
         }
     }
 }
