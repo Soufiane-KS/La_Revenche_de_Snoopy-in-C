@@ -195,8 +195,10 @@ void Setup(Balle *balle, Snoopy *snoopy)
     snoopy->v = 'S';
 
     // Initialize collectibles
+    srand(time(NULL));
     for (int i = 0; i < NUM_COLLECTIBLES; i++)
     {
+        
         collectibles[i].vivant = 1;
         collectibles[i].v = 'B';
         // Place collectibles at random positions
@@ -356,7 +358,7 @@ void Logic(Balle *ball, Snoopy *snoopy)
         if (snoopy->vie <= 0)
         {
             GameOver = true;
-            ShowGameOver(&snoopy);
+            ShowGameOver(snoopy);
             Sleep(5000);
             ball->vivant = false;
             return; // Exit the function if the game is over
@@ -400,3 +402,6 @@ void MainMenu()
 
     _getch(); // Wait for any key press
 }
+
+
+
