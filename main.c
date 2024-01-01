@@ -3,12 +3,16 @@
 #include <windows.h> // for Sleep function
 #include <conio.h>
 #include <stdbool.h>
+#include <time.h> // for time function
 #define HAUTEUR 10
 #define LARGEUR 20
 #define NUM_COLLECTIBLES 4 // Number of collectibles (B letters)
+#define GAME_DURATION 120 // Game duration in seconds
 
+//variables globales
 bool GameOver = false;
 bool Paused = false;
+char terrain[HAUTEUR][LARGEUR];
 
 typedef struct
 {
@@ -46,28 +50,20 @@ typedef struct
     char v; //(collectible letter)
 } Collectible;
 
-char terrain[HAUTEUR][LARGEUR];
-Collectible collectibles[NUM_COLLECTIBLES]; //Birds
+Collectible collectibles[NUM_COLLECTIBLES]; // Birds
 
 void ClearTerrain();
 void MoveBall(Balle *balle);
 void Setup(Balle *balle, Snoopy *snoopy);
-void Draw(Balle *balle, Snoopy *snoopy);
+void Draw(Balle *balle, Snoopy *snoopy, int timeLeft);
 void MoveSnoopy(Snoopy *snoopy);
 void ShowPauseMenu();
 void ShowGameOver(Snoopy *snoopy);
-void ShowYouWon(Snoopy *snoopy);
-void Logic(Balle *ball, Snoopy *snoopy);
+void ShowYouWon(Snoopy *snoopy, int timeLeft);
+void Logic(Balle *ball, Snoopy *snoopy, time_t startTime);
 void MainMenu();
 
-
-
-
-
-
-
-//-----------------main----------------//
-
+// -----------------main----------------//
 int main()
 {
     Balle balle;
@@ -75,20 +71,32 @@ int main()
 
     MainMenu();
     Setup(&balle, &snoopy);
+    time_t startTime = time(NULL);
+    time_t currentTime;
+    int elapsedTime = 0;
 
     while (balle.vivant && !GameOver)
     {
         // Move the ball and draw
         MoveSnoopy(&snoopy);
         MoveBall(&balle);
-        Draw(&balle, &snoopy);
-        Logic(&balle, &snoopy);
+        currentTime = time(NULL);
+        elapsedTime = difftime(currentTime, startTime);
+
+        if (elapsedTime >= GAME_DURATION)
+        {
+            GameOver = true;
+            break;
+        }
+
+        Draw(&balle, &snoopy, GAME_DURATION - elapsedTime);
+        Logic(&balle, &snoopy, startTime);
         Sleep(100); // Sleep for 100 milliseconds
     }
 
     if (!GameOver)
     {
-        ShowYouWon(&snoopy);
+        ShowYouWon(&snoopy, GAME_DURATION - elapsedTime);
         exit(0);
     }
     else
@@ -99,15 +107,7 @@ int main()
     return 0;
 }
 
-//--------------------------main-end----------------------------//
-
-
-
-
-
-
-
-
+// --------------------------main-end----------------------------//
 
 void ClearTerrain()
 {
@@ -198,7 +198,7 @@ void Setup(Balle *balle, Snoopy *snoopy)
     srand(time(NULL));
     for (int i = 0; i < NUM_COLLECTIBLES; i++)
     {
-        
+
         collectibles[i].vivant = 1;
         collectibles[i].v = 'B';
         // Place collectibles at random positions
@@ -207,7 +207,7 @@ void Setup(Balle *balle, Snoopy *snoopy)
     }
 }
 
-void Draw(Balle *balle, Snoopy *snoopy)
+void Draw(Balle *balle, Snoopy *snoopy, int timeLeft)
 {
     system("cls"); // Clear the console in Windows
     ClearTerrain();
@@ -240,8 +240,8 @@ void Draw(Balle *balle, Snoopy *snoopy)
         printf("\n");
     }
 
-    // Display Score and Lives
-    printf("Score: %d\tLives: %d\n", snoopy->score, snoopy->vie);
+    // Display Score, Lives, and Time Left
+    printf("Score: %d\tLives: %d\tTime Left: %d seconds\n", snoopy->score, snoopy->vie, timeLeft);
 }
 
 void ShowPauseMenu()
@@ -325,7 +325,7 @@ void ShowGameOver(Snoopy *snoopy)
     Sleep(5000);
 }
 
-void ShowYouWon(Snoopy *snoopy)
+void ShowYouWon(Snoopy *snoopy, int timeLeft)
 {
     system("cls"); // Clear the console in Windows
 
@@ -335,11 +335,10 @@ void ShowYouWon(Snoopy *snoopy)
     printf("#                            #\n");
     printf("##############################\n");
     printf("\n");
-    printf("Score: %d\tLives Left: %d\n", snoopy->score, snoopy->vie);
+    printf("Score: %d\tLives Left: %d\tTime Left: %d seconds\n", snoopy->score, snoopy->vie, timeLeft);
 }
 
-
-void Logic(Balle *ball, Snoopy *snoopy)
+void Logic(Balle *ball, Snoopy *snoopy, time_t startTime)
 {
     // Check if Snoopy ate a collectible
     for (int i = 0; i < NUM_COLLECTIBLES; i++)
@@ -383,13 +382,11 @@ void Logic(Balle *ball, Snoopy *snoopy)
 
     if (allCollected)
     {
-        ShowYouWon(snoopy);
+        ShowYouWon(snoopy, GAME_DURATION - difftime(time(NULL), startTime));
         Sleep(5000);
         ball->vivant = false;
     }
 }
-
-
 
 void MainMenu()
 {
@@ -402,6 +399,3 @@ void MainMenu()
 
     _getch(); // Wait for any key press
 }
-
-
-
